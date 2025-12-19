@@ -53,8 +53,7 @@ npm install
 Buat file .env dan isi seperti ini : 
 ```bash
 # MongoDB
-MONGODB_URI=mongodb://localhost:27017/onecommit-ai
-# Or use MongoDB Atlas: mongodb+srv://username:password@cluster.mongodb.net/onecommit-ai
+MONGODB_URI=
 
 # GitHub
 GITHUB_TOKEN=your_github_personal_access_token
@@ -85,7 +84,7 @@ AI_PROVIDER=openrouter
 JWT_SECRET=your_super_secret_jwt_key_change_this
 
 # Next.js
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_APP_URL=
 
 # Admin Setup
 ADMIN_EMAIL=admin@onecommit.ai
@@ -101,3 +100,4 @@ npm run dev
 ```
 
 ## =====GOOD LUCK=====
+
