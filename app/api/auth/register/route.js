@@ -13,8 +13,11 @@ export async function POST(request) {
     const body = await request.json();
     const { name, email, password, githubUsername } = body;
     
+    console.log('📝 Registration attempt:', { name, email, githubUsername });
+    
     // Validation
     if (!name || !email || !password) {
+      console.log('❌ Validation failed: Missing fields');
       return Response.json(
         { error: 'Name, email, and password are required' },
         { status: 400 }
@@ -22,6 +25,7 @@ export async function POST(request) {
     }
     
     if (password.length < 6) {
+      console.log('❌ Validation failed: Password too short');
       return Response.json(
         { error: 'Password must be at least 6 characters' },
         { status: 400 }
@@ -31,6 +35,7 @@ export async function POST(request) {
     // Check if user already exists
     const existingUser = await User.findByEmail(email);
     if (existingUser) {
+      console.log('❌ User already exists:', email);
       return Response.json(
         { error: 'Email already registered' },
         { status: 400 }
@@ -45,6 +50,8 @@ export async function POST(request) {
       githubUsername: githubUsername || null,
       role: 'participant'
     });
+    
+    console.log('✅ User created:', user.email);
     
     // Generate token
     const token = generateToken({
@@ -61,7 +68,7 @@ export async function POST(request) {
     }, { status: 201 });
     
   } catch (error) {
-    console.error('Register error:', error);
+    console.error('❌ Register error:', error);
     return Response.json(
       { error: error.message || 'Registration failed' },
       { status: 500 }
