@@ -1,10 +1,14 @@
 import { bootServer } from '@/lib/server';
 import { isMongoConnected, getConnectionStatus } from '@/lib/db';
 
-// Boot server when this route is first called
-bootServer().catch(error => {
-  console.error('Failed to boot server:', error);
-});
+// Boot server immediately when module loads
+let bootPromise = null;
+
+if (!bootPromise) {
+  bootPromise = bootServer().catch(error => {
+    console.error('Failed to boot server:', error);
+  });
+}
 
 /**
  * Health check endpoint
@@ -12,6 +16,18 @@ bootServer().catch(error => {
  */
 export async function GET() {
   try {
+    // Wait for boot to complete
+    await bootPromise;
+
+    // Dynamic import to avoid circular dependency
+    let aiInfo = { provider: 'none', model: 'none', configured: false };
+    try {
+      const aiModule = await import('@/lib/ai');
+      aiInfo = aiModule.getAIProviderInfo();
+    } catch (error) {
+      console.error('Could not load AI info:', error.message);
+    }
+
     const status = {
       status: 'ok',
       timestamp: new Date().toISOString(),
@@ -24,10 +40,13 @@ export async function GET() {
           status: 'pending' // Will be updated in Phase 6
         },
         github: {
-          status: 'pending' // Will be updated in Phase 4
+          status: process.env.GITHUB_TOKEN ? 'configured' : 'not configured',
+          webhook: process.env.GITHUB_WEBHOOK_SECRET ? 'configured' : 'not configured'
         },
         ai: {
-          status: 'pending' // Will be updated in Phase 5
+          provider: aiInfo.provider,
+          model: aiInfo.model,
+          status: aiInfo.configured ? 'configured' : 'not configured'
         }
       },
       environment: process.env.NODE_ENV || 'development'

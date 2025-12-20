@@ -3,11 +3,10 @@ import { requireAuth } from '@/lib/auth';
 import { getRepositoryCommits, parseGithubUrl } from '@/lib/github';
 import { processMultipleCommits } from '@/lib/commitProcessor';
 import Repo from '@/models/Repo';
-import Event from '@/models/Event';
 
 /**
  * Sync repository commits
- * POST /api/repo/sync-commits
+ * POST /api/repo/sync
  */
 export async function POST(request) {
   try {
