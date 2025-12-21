@@ -99,4 +99,4 @@ NODE_ENV=development
 npm run dev
 ```
 
-## =====GOOD LUCK=====
+### NOTE : Project gagal untuk sementara karena aku berfikir bisa liat commit dengan webhook user lain. Next update mungkin coba pake login github Oauth aja.
