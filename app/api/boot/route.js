@@ -1,12 +1,15 @@
 import { bootServer } from '@/lib/server';
 import { isMongoConnected, getConnectionStatus } from '@/lib/db';
 
-// Boot server immediately when module loads
+// Boot server immediately when this module loads
 let bootPromise = null;
 
+// Auto-boot on server start
 if (!bootPromise) {
+  console.log('🔄 Initializing server boot...');
   bootPromise = bootServer().catch(error => {
-    console.error('Failed to boot server:', error);
+    console.error('❌ Failed to boot server:', error);
+    return null;
   });
 }
 
@@ -17,7 +20,9 @@ if (!bootPromise) {
 export async function GET() {
   try {
     // Wait for boot to complete
-    await bootPromise;
+    if (bootPromise) {
+      await bootPromise;
+    }
 
     // Dynamic import to avoid circular dependency
     let aiInfo = { provider: 'none', model: 'none', configured: false };
@@ -37,7 +42,7 @@ export async function GET() {
           status: getConnectionStatus()
         },
         discord: {
-          status: 'pending' // Will be updated in Phase 6
+          status: 'check console logs'
         },
         github: {
           status: process.env.GITHUB_TOKEN ? 'configured' : 'not configured',

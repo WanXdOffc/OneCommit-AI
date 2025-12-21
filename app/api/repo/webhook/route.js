@@ -1,5 +1,5 @@
 import { connectDB } from '@/lib/db';
-import { requireAuth } from '@/lib/auth';
+//import { requireAuth } from '@/lib/auth';
 import { createWebhook, parseGithubUrl } from '@/lib/github';
 import Repo from '@/models/Repo';
 
@@ -11,8 +11,10 @@ export async function POST(request) {
   try {
     await connectDB();
     
-    const user = await requireAuth(request);
-    
+    if (!user) {
+      return Response.json({ error: 'Authentication required' }, { status: 401 });
+    }
+
     const body = await request.json();
     const { repoId } = body;
     

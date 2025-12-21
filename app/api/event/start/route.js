@@ -53,6 +53,13 @@ export async function POST(request) {
     // Start event
     await event.startEvent();
     
+    // Set Discord channel if configured
+    if (process.env.DISCORD_CHANNEL_ID && !event.discordChannelId) {
+      event.discordChannelId = process.env.DISCORD_CHANNEL_ID;
+      await event.save();
+      console.log('✅ Discord channel configured for event');
+    }
+    
     await event.populate('participants.user', 'name email githubUsername');
     await event.populate('participants.repo', 'githubUrl fullName');
     

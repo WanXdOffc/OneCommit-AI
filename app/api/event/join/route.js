@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/auth';
 import Event from '@/models/Event';
 import Repo from '@/models/Repo';
 import Score from '@/models/Score';
+import { createWebhook, parseGithubUrl } from '@/lib/github';
 
 /**
  * Join event with GitHub repository
@@ -118,6 +119,23 @@ export async function POST(request) {
     user.totalEvents += 1;
     await user.save();
     
+    // AUTO SETUP WEBHOOK
+    let webhookSetup = { success: false, message: 'Webhook not configured' };
+    try {
+      const webhookUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/github/webhook`;
+      const webhook = await createWebhook(owner, repoName, webhookUrl);
+      await repo.activateWebhook(webhook.id);
+      webhookSetup = { success: true, webhookId: webhook.id };
+      console.log('✅ Webhook auto-setup for:', repo.fullName);
+    } catch (webhookError) {
+      console.error('⚠️ Webhook auto-setup failed:', webhookError.message);
+      webhookSetup = { 
+        success: false, 
+        error: webhookError.message,
+        hint: 'You can manually setup webhook later or check GITHUB_TOKEN permissions'
+      };
+    }
+    
     console.log('✅ User joined event:', user.email, '→', event.name);
     
     // Populate event data
@@ -137,7 +155,8 @@ export async function POST(request) {
         id: repo._id,
         githubUrl: repo.githubUrl,
         fullName: repo.fullName
-      }
+      },
+      webhook: webhookSetup
     }, { status: 201 });
     
   } catch (error) {
